@@ -1,0 +1,40 @@
+{
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "cSpell.words": [
+        "celerybeat",
+        "Connor",
+        "Cython",
+        "diagbe",
+        "dmypy",
+        "fastapi",
+        "htmlcov",
+        "ipynb",
+        "ipython",
+        "mkdocs",
+        "mypy",
+        "nosetests",
+        "pipenv",
+        "Pipfile",
+        "pycache",
+        "pyenv",
+        "pyflow",
+        "pypa",
+        "pypackages",
+        "pyproject",
+        "pytest",
+        "pytype",
+        "ropeproject",
+        "scrapy",
+        "sdist",
+        "Spyder",
+        "spyderproject",
+        "spyproject",
+        "uvicorn",
+        "venv",
+        "webassets"
+    ]
+}

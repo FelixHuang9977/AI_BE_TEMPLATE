@@ -1,0 +1,12 @@
+{
+    "recommendations": [
+        "alefragnani.bookmarks",
+        "streetsidesoftware.code-spell-checker",
+        "bierner.markdown-mermaid",
+        "hediet.vscode-drawio",
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-python.vscode-python-envs",
+        "gruntfuggly.todo-tree"
+    ]
+}
