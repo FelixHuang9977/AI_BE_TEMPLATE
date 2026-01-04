@@ -71,7 +71,7 @@ def test_3_stop_delete():
 
 def test_4_clear_old_results():
     """
-    Step 4: Teset clear old results API.
+    Step 4: Test clear old results API.
     """
     payload = {"days": 0} 
     response = requests.post(f"{BASE_URL}/api/v1/assemble_test_clear_old_result", json=payload)

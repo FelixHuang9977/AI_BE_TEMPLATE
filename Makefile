@@ -64,3 +64,10 @@ ifeq ($(DETECTED_OS),Windows)
 else
 	- rm -f .tmp.* scripts/.tmp.* > /dev/null 2>&1
 endif
+
+test:
+ifeq ($(DETECTED_OS),Windows)
+	.venv\Scripts\pytest -v --show-capture=all tests/test_real_predefined_id.py
+else
+	.venv/bin/pytest -v --show-capture=all tests/test_real_predefined_id.py
+endif
