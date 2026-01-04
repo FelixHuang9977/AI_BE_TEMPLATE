@@ -111,14 +111,14 @@
             "test_status": "string"   // "pending", "in_progress", "completed", "failed"
         }
         - description: get a assemble test for specific test_id
-        - it check the result of the assemble test from result_assemble_test_{test_id}.txt
+        - it check the result of the assemble test from .tmp.result_assemble_test_{test_id}.txt
 
     3. /api/v1/assemble_test/{test_id}
         - method: delete
         - description: delete or cancel a assemble test for specific test_id
         - read process_id from .tmp.{test_id}.pid, try to kill the process if it is running.
         - delete the .tmp.{test_id}.pid file
-        - rename the result_assemble_test_{test_id}.txt to result_assemble_test_{test_id}_deleted.txt
+        - rename the .tmp.result_assemble_test_{test_id}.txt to .tmp.result_assemble_test_{test_id}_deleted.txt
 
     4. /api/v1/assemble_test_clear_old_result
         - method: post
