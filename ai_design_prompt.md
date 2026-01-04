@@ -75,6 +75,8 @@
         * admin call DIAG_BE api to cancel or stop a assemble test or clear old test result
         * DIAG_BE cancel or stop the assemble test or clear old test result
 
+    - Operation 5: (initiator: ADMIN)  
+        * ADMIN will monitor all running assemble test process by call API (/api/v1/assemble_test) to get test status.
 
 # Test:
     - create test cases by pytest
