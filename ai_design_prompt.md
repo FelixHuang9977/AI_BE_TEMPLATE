@@ -262,7 +262,8 @@
     - add verbose option to pytest to show more detailed information
     - for mock scripts, add mock to file name prefix. such as mock_assemble_test.py
     - for mock-based test cases, add mock to file name prefix. such as test_mock_xxx.py
-    - create a test case, name as test_real_xxx.py, to test the real assemble test process; don't use mock scripts; use real assemble test scripts; don't use unittest.mock module; call the API to perform the assemble test process; use simple http client to call the API:  get /api/v1/assemble_test/ and post /api/v1/assemble_test/ 
+    - create a test case, name as test_real_xxx.py, to test the real assemble test process; don't use mock scripts; use real assemble test scripts; don't use unittest.mock module; call the API to perform the assemble test process; use simple http client to call the API:  get /api/v1/assemble_test/ and post /api/v1/assemble_test/
+    - add a test case for predefined test_id=1; use production env, should cover create, get, stop, delete, clear_old_result operations; use different functions to implement.
 
 # Update Testcase and do sanity check after implementation:
     - I already use git to do version control, if you modified any code or add/del any operations, you add test cases to test the modified code or operations.

@@ -10,6 +10,7 @@
         "Cython",
         "diagbe",
         "dmypy",
+        "dotenv",
         "fastapi",
         "findstr",
         "htmlcov",
