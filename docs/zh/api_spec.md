@@ -37,7 +37,8 @@ DIAGBE API 作為 AI 診斷系統的後端介面，其主要目標包括：
     ```json
     {
         "cable_uid": "string",
-        "test_data": "string"
+        "test_data": "string",
+        "test_id": "string"  // 可選。若存在則使用之；若不存在則創建新 ID；若已存在且衝突則返回錯誤
     }
     ```
 *   **回應本體**:

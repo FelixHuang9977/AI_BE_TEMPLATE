@@ -27,6 +27,8 @@
 
     1. create a README.md for how to launch, install, run, stop, and deploy, and basic test
        - explain how to do simple test by curl to create a test, get all pending tests, stop the test.
+       - add example for how to use predefined test_id=1 to create a test and get the test status and stop the test. let all steps in single session. one section for linux user; another section for windows powershell user.
+
     2. create requirements.txt for dependencies
     3. create a systemd service file for the backend service
     4. create a standard python project structure (refer: https://retailtechinnovationhub.com/home/2024/2/29/the-ultimate-guide-to-structuring-a-python-package)
@@ -123,7 +125,8 @@
         - request body: 
         {
             "cable_uid": "string",
-            "test_data": "string"
+            "test_data": "string",
+            "test_id": "string"  // if exist, use it; if not exist, create a new test_id; if exist, return error
         }
         - response body: 
         {

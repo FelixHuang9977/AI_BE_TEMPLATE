@@ -42,37 +42,47 @@ uvicorn app.main:app --host 0.0.0.0 --port 9000
 
 ### 基本測試 (Curl)
 
-你可以使用 `curl` 進行簡單測試:
-> **Windows PowerShell 使用者注意**: PowerShell 會將 `curl` 作為 `Invoke-WebRequest` 的別名。若要使用原生 curl，請使用 `curl.exe`。
-> **重要**: 在 PowerShell 中使用 `curl.exe` 時，必須使用單引號包覆 JSON 內容，並**使用反斜線轉義內部的雙引號**。
-> 範例: `-d '{\"key\": \"value\"}'`
+### 使用手冊 (Curl)
 
-1. **建立測試**:
+#### 1. Linux / Bash / 命令提示字元 (Command Prompt) 使用者
+以下是使用預定義 ID (`test_id=1`) 創建、檢查和停止測試的完整流程。
 
-   **Bash / Command Prompt**:
-   ```bash
-   curl -X POST "http://localhost:9000/api/v1/assemble_test" -H "Content-Type: application/json" -d "{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\"}"
-   ```
+**建立測試 (test_id=1):**
+```bash
+curl -X POST "http://localhost:9000/api/v1/assemble_test" \
+     -H "Content-Type: application/json" \
+     -d "{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\", \"test_id\": \"1\"}"
+```
 
-   **PowerShell**:
-   ```powershell
-   curl.exe -X POST "http://localhost:9000/api/v1/assemble_test" -H "Content-Type: application/json" -d '{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\"}'
-   ```
+**檢查狀態:**
+```bash
+curl "http://localhost:9000/api/v1/assemble_test/1"
+```
 
-2. **檢查狀態** (將 `{test_id}` 替換為上一步回應中的 ID):
-   ```bash
-   curl "http://localhost:9000/api/v1/assemble_test/{test_id}"
-   ```
+**停止/刪除測試:**
+```bash
+curl -X DELETE "http://localhost:9000/api/v1/assemble_test/1"
+```
 
-3. **獲取所有測試**:
-   ```bash
-   curl "http://localhost:9000/api/v1/assemble_test"
-   ```
+#### 2. Windows PowerShell 使用者
+> **重要**: PowerShell 需要特定的轉義語法。請使用 `curl.exe`，將 JSON 用**單引號**包覆，並**使用反斜線轉義內部的雙引號**。
 
-4. **停止/刪除測試**:
-   ```bash
-   curl -X DELETE "http://localhost:9000/api/v1/assemble_test/{test_id}"
-   ```
+**建立測試 (test_id=1):**
+```powershell
+curl.exe -X POST "http://localhost:9000/api/v1/assemble_test" `
+         -H "Content-Type: application/json" `
+         -d '{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\", \"test_id\": \"1\"}'
+```
+
+**檢查狀態:**
+```powershell
+curl.exe "http://localhost:9000/api/v1/assemble_test/1"
+```
+
+**停止/刪除測試:**
+```powershell
+curl.exe -X DELETE "http://localhost:9000/api/v1/assemble_test/1"
+```
 
 ## 開發
 

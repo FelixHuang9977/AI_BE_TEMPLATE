@@ -37,7 +37,8 @@ Create a new assemble test.
     ```json
     {
         "cable_uid": "string",
-        "test_data": "string"
+        "test_data": "string",
+        "test_id": "string"  // Optional. If exist, use it; if not exist, create a new test_id; if exist and conflict, return error
     }
     ```
 *   **Response Body**:

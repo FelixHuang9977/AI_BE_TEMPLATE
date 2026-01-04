@@ -13,6 +13,7 @@ app = FastAPI()
 class AssembleTestRequest(BaseModel):
     cable_uid: str
     test_data: str
+    test_id: Optional[str] = None
 
 class AssembleTestResponse(BaseModel):
     cable_uid: str
@@ -94,11 +95,24 @@ def read_root():
 async def create_assemble_test(request: AssembleTestRequest, background_tasks: BackgroundTasks):
     cable_uid = request.cable_uid
     test_data = request.test_data
-    test_id = str(uuid.uuid4())
     
     # Locate script
     # Use utils to get directory (testable)
     scripts_dir = utils.get_scripts_dir()
+
+    if request.test_id:
+        test_id = request.test_id
+        # Check if already exists
+        # Logic: check for pid file or result file
+        pid_file = os.path.join(scripts_dir, f".tmp.{test_id}.pid")
+        result_file = os.path.join(scripts_dir, f".tmp.result_assemble_test_{test_id}.txt")
+        
+        if os.path.exists(pid_file) or os.path.exists(result_file):
+             raise HTTPException(status_code=400, detail="Test ID already exists")
+    else:
+        test_id = str(uuid.uuid4())
+    
+    # Locate script
     
     command = utils.find_assemble_script(scripts_dir)
     

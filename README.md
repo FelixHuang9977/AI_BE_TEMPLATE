@@ -59,37 +59,47 @@ uvicorn app.main:app --host 0.0.0.0 --port 9000 --reload
 
 ### Basic Test (Curl)
 
-You can perform a simple test using `curl`. 
-> **Note for Windows PowerShell Users**: PowerShell aliases `curl` to `Invoke-WebRequest`. To use native curl, use `curl.exe`.  
-> **Important**: When using `curl.exe` in PowerShell, you must wrap the JSON body in single quotes and **escape internal double quotes with a backslash**.  
-> Example: `-d '{\"key\": \"value\"}'`
+### User Manual (Curl)
 
-1. **Create a test**:
-   
-   **Bash / Command Prompt**:
-   ```bash
-   curl -X POST "http://localhost:9000/api/v1/assemble_test" -H "Content-Type: application/json" -d "{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\"}"
-   ```
+#### 1. Linux / Bash / Command Prompt Users
+Here is a complete session to create, check, and stop a test using a predefined ID (`test_id=1`).
 
-   **PowerShell**:
-   ```powershell
-   curl.exe -X POST "http://localhost:9000/api/v1/assemble_test" -H "Content-Type: application/json" -d '{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\"}'
-   ```
+**Create a test (test_id=1):**
+```bash
+curl -X POST "http://localhost:9000/api/v1/assemble_test" \
+     -H "Content-Type: application/json" \
+     -d "{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\", \"test_id\": \"1\"}"
+```
 
-2. **Check status** (replace `{test_id}` with the ID from the response):
-   ```bash
-   curl "http://localhost:9000/api/v1/assemble_test/{test_id}"
-   ```
+**Get test status:**
+```bash
+curl "http://localhost:9000/api/v1/assemble_test/1"
+```
 
-3. **Get all tests**:
-   ```bash
-   curl "http://localhost:9000/api/v1/assemble_test"
-   ```
+**Stop/Delete test:**
+```bash
+curl -X DELETE "http://localhost:9000/api/v1/assemble_test/1"
+```
 
-4. **Stop/Delete a test**:
-   ```bash
-   curl -X DELETE "http://localhost:9000/api/v1/assemble_test/{test_id}"
-   ```
+#### 2. Windows PowerShell Users
+> **Important**: PowerShell requires specific escaping. Use `curl.exe`, wrap JSON in **single quotes**, and escape internal double quotes.
+
+**Create a test (test_id=1):**
+```powershell
+curl.exe -X POST "http://localhost:9000/api/v1/assemble_test" `
+         -H "Content-Type: application/json" `
+         -d '{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\", \"test_id\": \"1\"}'
+```
+
+**Get test status:**
+```powershell
+curl.exe "http://localhost:9000/api/v1/assemble_test/1"
+```
+
+**Stop/Delete test:**
+```powershell
+curl.exe -X DELETE "http://localhost:9000/api/v1/assemble_test/1"
+```
 
 ## Development
 

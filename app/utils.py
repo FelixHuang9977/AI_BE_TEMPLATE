@@ -47,6 +47,8 @@ def run_assemble_test_process(command: list, cable_uid: str, test_data: str, tes
         full_command = command + [cable_uid, test_data, test_id]
         
         # Spawn the process. 
+        # Spawn the process. 
+        proc = None
         if platform.system() == "Windows":
              # Use cmd 'start' to detach completely
              # We need to construct a string command for shell=True
@@ -59,7 +61,7 @@ def run_assemble_test_process(command: list, cable_uid: str, test_data: str, tes
              # Add args
              cmd_str += f' "{cable_uid}" "{test_data}" "{test_id}"'
              
-             subprocess.Popen(cmd_str, cwd=base_dir, shell=True)
+             proc = subprocess.Popen(cmd_str, cwd=base_dir, shell=True)
              
         else:
              # On Linux/Unix
@@ -67,7 +69,7 @@ def run_assemble_test_process(command: list, cable_uid: str, test_data: str, tes
              kwargs['start_new_session'] = True
              kwargs['close_fds'] = True
              
-             subprocess.Popen(
+             proc = subprocess.Popen(
                 full_command, 
                 cwd=base_dir,
                 stdout=subprocess.DEVNULL,
@@ -75,6 +77,12 @@ def run_assemble_test_process(command: list, cable_uid: str, test_data: str, tes
                 **kwargs
              )
         
+        if proc:
+            # Save PID to file
+            pid_file = os.path.join(base_dir, f".tmp.{test_id}.pid")
+            with open(pid_file, 'w') as f:
+                f.write(str(proc.pid))
+                
     except Exception as e:
         print(f"Failed to spawn process: {e}")
 
