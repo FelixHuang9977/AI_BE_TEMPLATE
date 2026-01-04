@@ -59,16 +59,36 @@ uvicorn app.main:app --host 0.0.0.0 --port 9000 --reload
 
 ### Basic Test (Curl)
 
-You can perform a simple test using `curl`:
+You can perform a simple test using `curl`. 
+> **Note for Windows PowerShell Users**: PowerShell aliases `curl` to `Invoke-WebRequest`. To use native curl, use `curl.exe`.  
+> **Important**: When using `curl.exe` in PowerShell, you must wrap the JSON body in single quotes and **escape internal double quotes with a backslash**.  
+> Example: `-d '{\"key\": \"value\"}'`
 
 1. **Create a test**:
+   
+   **Bash / Command Prompt**:
    ```bash
    curl -X POST "http://localhost:9000/api/v1/assemble_test" -H "Content-Type: application/json" -d "{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\"}"
+   ```
+
+   **PowerShell**:
+   ```powershell
+   curl.exe -X POST "http://localhost:9000/api/v1/assemble_test" -H "Content-Type: application/json" -d '{\"cable_uid\": \"CABLE-TEST-01\", \"test_data\": \"demo\"}'
    ```
 
 2. **Check status** (replace `{test_id}` with the ID from the response):
    ```bash
    curl "http://localhost:9000/api/v1/assemble_test/{test_id}"
+   ```
+
+3. **Get all tests**:
+   ```bash
+   curl "http://localhost:9000/api/v1/assemble_test"
+   ```
+
+4. **Stop/Delete a test**:
+   ```bash
+   curl -X DELETE "http://localhost:9000/api/v1/assemble_test/{test_id}"
    ```
 
 ## Development

@@ -26,7 +26,7 @@
 # Implementation:
 
     1. create a README.md for how to launch, install, run, stop, and deploy, and basic test
-       - explain how to do simple test by curl
+       - explain how to do simple test by curl to create a test, get all pending tests, stop the test.
     2. create requirements.txt for dependencies
     3. create a systemd service file for the backend service
     4. create a standard python project structure (refer: https://retailtechinnovationhub.com/home/2024/2/29/the-ultimate-guide-to-structuring-a-python-package)
