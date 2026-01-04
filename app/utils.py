@@ -144,7 +144,7 @@ def get_all_fim_states(scripts_dir: str):
             except ValueError:
                 continue
                 
-            # rack_sn is everthing between 'state' and last part
+            # rack_sn is everything between 'state' and last part
             # parts[0]=fim, parts[1]=state
             rack_sn = "_".join(parts[2:-1])
             
@@ -245,5 +245,146 @@ def delete_fim_state(scripts_dir: str, rack_sn: str, test_round_id: int):
         os.remove(fpath)
         return True
     return False
+
+import time
+
+def clear_old_results(scripts_dir: str, days: int = 1):
+    """
+    Delete result files and PID files older than {days} days.
+    If days is 0, delete all result files and PID files.
+    """
+    if not os.path.exists(scripts_dir):
+        return
+
+    # Files to match: .tmp.result_assemble_test_*.txt and .tmp.*.pid
+    patterns = [
+        os.path.join(scripts_dir, ".tmp.result_assemble_test_*.txt"),
+        os.path.join(scripts_dir, ".tmp.*.pid")
+    ]
+    
+    files_to_check = []
+    for pattern in patterns:
+        files_to_check.extend(glob.glob(pattern))
+        
+    now = time.time()
+    cutoff_time = now - (days * 86400)
+    
+    for fpath in files_to_check:
+        try:
+            if days == 0:
+                os.remove(fpath)
+            else:
+                mtime = os.path.getmtime(fpath)
+                if mtime < cutoff_time:
+                    os.remove(fpath)
+        except Exception as e:
+            print(f"Failed to remove {fpath}: {e}")
+
+import signal
+
+def delete_assemble_test(scripts_dir: str, test_id: str):
+    """
+    Deletes an assemble test.
+    1. Kill process if running.
+    2. Delete pid file.
+    3. Rename result file to _deleted.txt
+    """
+    pid_file = os.path.join(scripts_dir, f".tmp.{test_id}.pid")
+    result_file = os.path.join(scripts_dir, f".tmp.result_assemble_test_{test_id}.txt")
+    
+    # 1. Kill process
+    if os.path.exists(pid_file):
+        try:
+            with open(pid_file, 'r') as f:
+                pid_str = f.read().strip()
+                if pid_str:
+                    pid = int(pid_str)
+                    try:
+                        os.kill(pid, signal.SIGTERM)
+                    except OSError:
+                        pass # Process might be already dead
+            
+            # 2. Delete pid file
+            os.remove(pid_file)
+        except Exception as e:
+            print(f"Error cleaning up PID {test_id}: {e}")
+            
+    # 3. Rename result file
+    if os.path.exists(result_file):
+        deleted_file = os.path.join(scripts_dir, f".tmp.result_assemble_test_{test_id}_deleted.txt")
+        # If deleted file already exists, overwrite?
+        if os.path.exists(deleted_file):
+            try:
+                os.remove(deleted_file)
+            except:
+                pass
+        try:
+            os.rename(result_file, deleted_file)
+        except Exception as e:
+             print(f"Error renaming result file {test_id}: {e}")
+             
+    return True
+
+
+def get_all_assemble_tests(scripts_dir: str):
+    """
+    Returns a list of all assemble tests found in the scripts directory.
+    Scans for .tmp.{test_id}.pid files.
+    """
+    pattern = os.path.join(scripts_dir, ".tmp.*.pid")
+    files = glob.glob(pattern)
+    
+    results = []
+    
+    for fpath in files:
+        try:
+            fname = os.path.basename(fpath)
+            # Format: .tmp.{test_id}.pid
+            # Split by '.' -> ['', 'tmp', test_id, 'pid']
+            parts = fname.split('.')
+            if len(parts) < 4:
+                continue
+                
+            test_id = parts[2]
+            
+            # Use get_assemble_test_status logic to get details?
+            # Or just return basic info?
+            # The API spec says return cable_uid, process_id, test_status
+            
+            # Read PID from file?
+            with open(fpath, 'r') as f:
+                process_id = f.read().strip()
+                
+            # Check for result file for status/cable_uid
+            res_fname = os.path.join(scripts_dir, f".tmp.result_assemble_test_{test_id}.txt")
+            
+            test_status = "unknown"
+            cable_uid = "unknown"
+            
+            if os.path.exists(res_fname):
+                try:
+                    with open(res_fname, 'r') as f:
+                        data = json.load(f)
+                        test_status = data.get("test_status", "unknown")
+                        cable_uid = data.get("cable_uid", "unknown")
+                except:
+                    pass
+            else:
+                # If no result file but pid exists, maybe "pending" or "in_progress"?
+                # Design prompt says "pending" or "in_progress".
+                # If PID exists, it means we launched it.
+                test_status = "in_progress" # Simplified assumption
+            
+            results.append({
+                "cable_uid": cable_uid,
+                "test_id": test_id,
+                "process_id": process_id,
+                "test_status": test_status
+            })
+            
+        except Exception:
+            continue
+            
+    return {"all_test": results}
 
 

@@ -25,7 +25,8 @@
 
 # Implementation:
 
-    1. create a README.md for how to launch, install, and deploy
+    1. create a README.md for how to launch, install, run, stop, and deploy, and basic test
+       - explain how to do simple test by curl
     2. create requirements.txt for dependencies
     3. create a systemd service file for the backend service
     4. create a standard python project structure (refer: https://retailtechinnovationhub.com/home/2024/2/29/the-ultimate-guide-to-structuring-a-python-package)
@@ -74,6 +75,7 @@
         * admin call DIAG_BE api to cancel or stop a assemble test or clear old test result
         * DIAG_BE cancel or stop the assemble test or clear old test result
 
+
 # Test:
     - create test cases by pytest
     - for test case, should emulate a long run process(like sleep 5 seconds); 
@@ -98,8 +100,23 @@
         - individual API: name, method, request body, response body, description, and example.
 
 # api list:
-
     1. /api/v1/assemble_test
+        - method: get
+        - response body: 
+        {
+            "all_test": [
+                {
+                    "cable_uid": "string",
+                    "test_id": "string",
+                    "process_id": "string",
+                    "test_status": "string"   // "pending", "in_progress", "completed", "error"
+                }
+            ]
+        }
+        - description: get all assemble test
+        - it will read all .tmp.{test_id}.pid files and return the test_id, process_id, test_status
+
+    2. /api/v1/assemble_test
         - method: post
         - request body: 
         {
@@ -125,7 +142,7 @@
             - if found, run it
             - if not found, return error
 
-    2. /api/v1/assemble_test/{test_id}
+    3. /api/v1/assemble_test/{test_id}
         - method: get
         - response body: 
         {
@@ -137,14 +154,14 @@
         - description: get a assemble test for specific test_id
         - it check the result of the assemble test from .tmp.result_assemble_test_{test_id}.txt
 
-    3. /api/v1/assemble_test/{test_id}
+    4. /api/v1/assemble_test/{test_id}
         - method: delete
         - description: delete or cancel a assemble test for specific test_id
         - read process_id from .tmp.{test_id}.pid, try to kill the process if it is running.
         - delete the .tmp.{test_id}.pid file
         - rename the .tmp.result_assemble_test_{test_id}.txt to .tmp.result_assemble_test_{test_id}_deleted.txt
 
-    4. /api/v1/assemble_test_clear_old_result
+    5. /api/v1/assemble_test_clear_old_result
         - method: post
         - request body: 
         {
@@ -155,7 +172,7 @@
         - if not specify days, default to 1 days
         - if days is 0, delete all old result files and pid files.
 
-    5. /api/v1/fim_state
+    6. /api/v1/fim_state
         - method: get
         - response body: 
         {
@@ -177,7 +194,7 @@
         }
         - description: get fim state for all rack_sn
 
-    6. /api/v1/fim_state/{rack_sn}
+    7. /api/v1/fim_state/{rack_sn}
         - method: get
         - response body: 
         {
@@ -195,7 +212,7 @@
         }
         - description: get fim state for specific rack_sn
 
-    7. /api/v1/fim_state/{rack_sn}/{test_round_id}
+    8. /api/v1/fim_state/{rack_sn}/{test_round_id}
         - method: get
         - response body: 
         {
@@ -210,7 +227,7 @@
         - description: get fim state for specific rack_sn
         - note: keep the redundant data (rack_sn, test_round_id) for get/set; the caller can parse it easily
 
-    8. /api/v1/fim_state/{rack_sn}/{test_round_id}
+    9. /api/v1/fim_state/{rack_sn}/{test_round_id}
         - method: post
         - request body: 
         {
@@ -230,7 +247,7 @@
         - fim_state will be defined by DIAG_SW, just treat it as raw json data
         - note: keep the redundant data (rack_sn, test_round_id) for get/set; the caller can parse it easily
         
-    9. /api/v1/fim_state/{rack_sn}/{test_round_id}
+    10. /api/v1/fim_state/{rack_sn}/{test_round_id}
         - method: delete
         - description: delete fim state for specific rack_sn and specific test_round_id
         - delete the fim_state_{rack_sn}_{test_round_id}.json

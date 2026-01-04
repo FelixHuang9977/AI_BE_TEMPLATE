@@ -19,6 +19,17 @@ class AssembleTestResponse(BaseModel):
     test_id: str
     test_status: str
 
+
+
+class AssembleTestItem(BaseModel):
+    cable_uid: str
+    test_id: str
+    process_id: str
+    test_status: str
+
+class AssembleTestListResponse(BaseModel):
+    all_test: List[AssembleTestItem]
+
 class AssembleTestStatusResponse(BaseModel):
     cable_uid: str
     test_id: str
@@ -68,6 +79,9 @@ class FimStateUpdateRequest(BaseModel):
     # Actually, simpler: just use Dict[str, Any] for flexibility if structure varies, but Model is better.
     # Let's use FimStateRackItem structure for Request too.
 
+class ClearOldResultsRequest(BaseModel):
+    days: Optional[int] = 1
+
 
 # Configuration
 PORT = 9000
@@ -99,6 +113,13 @@ async def create_assemble_test(request: AssembleTestRequest, background_tasks: B
         test_id=test_id,
         test_status="pending"
     )
+
+
+
+@app.get("/api/v1/assemble_test", response_model=AssembleTestListResponse)
+async def get_all_assemble_tests():
+    scripts_dir = utils.get_scripts_dir()
+    return utils.get_all_assemble_tests(scripts_dir)
 
 @app.get("/api/v1/assemble_test/{test_id}", response_model=AssembleTestStatusResponse)
 async def get_assemble_test_status(test_id: str):
@@ -145,6 +166,18 @@ async def get_assemble_test_status(test_id: str):
             test_id=test_id,
             test_status="error"
         )
+
+@app.delete("/api/v1/assemble_test/{test_id}")
+async def delete_assemble_test(test_id: str):
+    scripts_dir = utils.get_scripts_dir()
+    utils.delete_assemble_test(scripts_dir, test_id)
+    return {"message": "Test deleted"}
+
+@app.post("/api/v1/assemble_test_clear_old_result")
+async def clear_old_results(request: ClearOldResultsRequest):
+    scripts_dir = utils.get_scripts_dir()
+    utils.clear_old_results(scripts_dir, request.days)
+    return {"message": "Cleanup completed"}
 
 # FIM State Endpoints
 

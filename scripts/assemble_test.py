@@ -20,8 +20,8 @@ def main():
     # Simulate processing
     # Initial status: pending (managed by API return), but script starts working
 
-    with open('.tmp.run_1.txt', 'w') as file:
-        file.write("xxx")
+    with open('.tmp.run_real.txt', 'w') as file:
+        file.write(f"test_id={test_id}")
         
     try:
         # Simulate some work
