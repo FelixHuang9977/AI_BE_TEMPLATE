@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=root
 WorkingDirectory=/opt/ai_diagbe
-ExecStart=/usr/bin/python3 -m app.main
+ExecStart=/opt/ai_diagbe/.venv/bin/python3 -m app.main
 Restart=always
 Environment=PYTHONPATH=/opt/ai_diagbe
 
