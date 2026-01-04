@@ -72,6 +72,7 @@
         - should include how to use git to checkout to specific branch
     - create/update LICENSE.md in markdown format (LICENSE.md)
     - for drawio format document, use black font color and white background color.
+    - create/update the API spec in markdown format (api_spec.md); i will provide this to other team members to implement the API. it should include the API summary, API list, and individual API: name, method, request body, response body, description, and example.
 
 # api list:
 
