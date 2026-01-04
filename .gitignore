@@ -1,5 +1,6 @@
 scripts/result_assemble_test_*.txt
 .tmp*
+result_*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

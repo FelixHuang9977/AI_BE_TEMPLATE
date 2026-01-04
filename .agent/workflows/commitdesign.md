@@ -7,5 +7,5 @@ ai_design_prompt.md
 .vscode\*
 .agent\workflows\*
 
-you should summarize the changes in one line for commit message
+you should summarize the changes in one line for commit message.
 remove other files in stage, just commit listed folders/files without asking me.

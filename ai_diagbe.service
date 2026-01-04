@@ -1,0 +1,13 @@
+[Unit]
+Description=AI Diagnosis Backend Service
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/ai_diagbe
+ExecStart=/usr/bin/python3 -m app.main
+Restart=always
+Environment=PYTHONPATH=/opt/ai_diagbe
+
+[Install]
+WantedBy=multi-user.target
