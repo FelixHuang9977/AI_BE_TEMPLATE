@@ -1,74 +1,26 @@
-# 設計規範 - DIAGBE
+# 設計規格書
 
-## 1. 簡介
-本項目 (**diagbe**) 是 AI 診斷系統的後端服務。它作為管理者處理組裝測試流程，並作為舊版診斷腳本 (DIAG_SW) 與車間系統 (SFC) 通信的接口。
+## 1. 系統概述
+DIAGBE 是 AI 診斷系統的後端服務，負責管理光纖電纜組裝測試流程。它充當電纜組裝輔助系統 (VI_BE)、車間系統 (SFC) 和舊版診斷腳本 (DIAG_SW) 之間的介面。
 
-## 2. 技術棧
-- **類型**: RESTful API 服務
-- **框架**: FastAPI (Python)
-- **端口**: 9000
-- **進程模型**: 守護進程 (Daemon process)
-- **操作系統支持**: Windows 和 Linux
-- **部署方式**: Pip / Wheel
-- **CI/CD**: GitHub Actions
+## 2. 參與者
+*   **DIAG_BE**: 後端服務 (FastAPI)。
+*   **VI_BE**: 前端服務 (電纜組裝輔助系統)。
+*   **SFC**: 車間系統。
+*   **DIAG_SW**: 舊版診斷腳本。
+*   **ADMIN**: 系統管理員。
+*   **OPERATOR**: 組裝操作員。
 
-## 3. 系統操作
+## 3. 操作
+*   **Operation 1 (組裝測試)**: VI_BE 請求建立測試。DIAG_BE 建立測試 ID，分叉進程執行測試腳本，並立即返回。
+*   **Operation 2 (檢查狀態)**: VI_BE 輪詢 DIAG_BE 獲取測試狀態 (pending, in_progress, completed, error)。
+*   **Operation 3 (推送結果)**: DIAG_SW 推送結果到 SFC。
+*   **Operation 4 (Admin Ops)**: ADMIN 取消/停止測試或清除舊結果。
+*   **FIM 狀態管理**: 根據機櫃序號 (Rack SN) 和測試輪次 (Test Round ID) 管理 FIM 狀態 (查詢/更新/刪除)。
 
-### 3.1 參與者
-- **DIAG_BE**: 本後端服務 (AI Diagnosis Backend)。
-- **VI_BE**: 線纜組裝輔助系統 (Cable Assembly Assist System)。
-- **SFC**: 車間系統 (Shop Floor System)。
-- **DIAG_SW**: 舊版診斷腳本。
-
-### 3.2 操作流程
-**操作 1: 線纜組裝測試 (由 VI_BE 發起)**
-1.  **檢查/刪除舊測試**: VI_BE 調用 DIAG_BE 檢查測試 ID 是否存在 (決定刪除/停止/中止)。
-2.  **創建測試**: VI_BE 調用 DIAG_BE `POST /api/v1/assemble_test` 創建新測試。
-3.  **進程分叉 (Fork)**: DIAG_BE 立即返回 `test_id` 並分叉一個非阻塞進程來運行實際測試 (調用 `assemble_test.py`, `.bat`, 或 `.sh`)。
-4.  **監控**: DIAG_BE 監控進程狀態 (通過輪詢結果文件或其他機制)。
-
-**操作 2: 狀態檢查 (由 SFC 發起)**
-1.  **獲取狀態**: SFC 調用 DIAG_BE `GET /api/v1/assemble_test/{test_id}`。
-2.  **響應**: DIAG_BE 檢查結果文件 (`.tmp.result_assemble_test_{test_id}.txt`) 並返回狀態。
-
-## 4. API 規範
-
-### 4.1 創建組裝測試
-- **端點**: `/api/v1/assemble_test`
-- **方法**: `POST`
-- **請求體**:
-  ```json
-  {
-      "cable_uid": "string",
-      "test_data": "string"
-  }
-  ```
-- **響應體**:
-  ```json
-  {
-      "cable_uid": "string",
-      "test_id": "string",
-      "test_status": "string"
-  }
-  ```
-- **描述**: 創建測試，分叉進程，並立即返回。
-
-### 4.2 獲取組裝測試狀態
-- **端點**: `/api/v1/assemble_test/{test_id}`
-- **方法**: `GET`
-- **響應體**:
-  ```json
-    {
-        "cable_uid": "string",
-        "test_id": "string",
-        "test_status": "string"
-    }
-  ```
-- **描述**: 檢查 `.tmp.result_assemble_test_{test_id}.txt` 獲取狀態。
-
-## 5. 實施細節
-- 後端必須以 **非阻塞** 模式調用外部腳本 (`assemble_test.py/bat/sh`)。
-- 在服務目錄中搜索腳本 (優先級: py > bat > sh)。
-- **驗證**: 
-    - `tests/test_mock_integration_states.py` 使用模擬腳本 (`scripts/mock_*.py`) 驗證狀態轉換。
-    - `tests/test_real_assemble_test.py` 使用真實腳本 (`scripts/assemble_test.py`) 驗證無模擬的完整非阻塞生命週期。
+## 4. 數據流
+*   VI_BE -> DIAG_BE: 建立測試，獲取狀態。
+*   DIAG_BE -> DIAG_SW: 分叉進程 (模擬/真實)。
+*   DIAG_SW -> 文件系統: 寫入狀態/結果。
+*   DIAG_BE -> 文件系統: 讀取狀態/結果。
+*   DIAG_BE -> 文件系統: 讀取/寫入 FIM 狀態 (JSON)。

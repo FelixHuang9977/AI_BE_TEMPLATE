@@ -1,158 +1,130 @@
-# API Specification (diagbe)
+# API Specification
 
-## Summary
-The **diagbe** service provides a RESTful API to manage the cable assembly test process. It serves as a bridge between the Cable Assembly Assist System (VI_BE) and the backend test execution, as well as providing status updates to the Shop Floor System (SFC).
+## 1. API Goals and Use Case
+The DIAGBE API serves as the backend interface for the AI Diagnosis System. Its primary goals are:
+*   **Test Management**: Create, monitor, and manage fiber cable assembly tests initiated by the frontend (VI_BE).
+*   **Process Orchestration**: Spawn and manage asynchronous test processes.
+*   **State Persistence**: Store and retrieve FIM (Fiber Interface Module) states for legacy diagnosis scripts.
+*   **Result Handling**: Provide access to test results and facilitate cleanup operations.
 
-The API runs on port **9000**.
+Common use cases include:
+*   VI_BE requesting a new test run for a specific cable.
+*   VI_BE polling for the status of an ongoing test.
+*   Legacy scripts saving intermediate states during testing.
+*   Admin clearing old logs and results.
 
-## API List
+## 2. API List
 
-| Method | Endpoint | Description |
+| Endpoint | Method | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/v1/assemble_test` | Create a new assembly test |
-| `GET` | `/api/v1/assemble_test/{test_id}` | Get status of an assembly test |
-| `DELETE` | `/api/v1/assemble_test/{test_id}` | Cancel/Delete an assembly test |
-| `POST` | `/api/v1/assemble_test_clear_old_result` | Clear old result files |
+| `/api/v1/assemble_test` | POST | Create a new assemble test. |
+| `/api/v1/assemble_test/{test_id}` | GET | Get status of an assemble test. |
+| `/api/v1/assemble_test/{test_id}` | DELETE | Cancel a test. |
+| `/api/v1/assemble_test_clear_old_result` | POST | Clear old test results. |
+| `/api/v1/fim_state` | GET | Get all FIM states. |
+| `/api/v1/fim_state/{rack_sn}` | GET | Get FIM state for a specific rack. |
+| `/api/v1/fim_state/{rack_sn}/{test_round_id}` | GET | Get FIM state for a specific round. |
+| `/api/v1/fim_state/{rack_sn}/{test_round_id}` | POST | Update FIM state. |
+| `/api/v1/fim_state/{rack_sn}/{test_round_id}` | DELETE | Delete FIM state. |
 
-## APIs
+## 3. Individual API Details
 
-### 1. Create Assemble Test
-Creates a new assembly test, generates a test ID, and launches the test process in the background.
+### /api/v1/assemble_test
 
-- **Name**: Create Assemble Test
-- **Method**: `POST`
-- **URL**: `/api/v1/assemble_test`
-- **Description**: This endpoint initiates a new test session. It forks a non-blocking process to run the `assemble_test` script and returns immediately with a `pending` status.
+#### **POST** /api/v1/assemble_test
+Create a new assemble test.
+*   **Request Body**:
+    ```json
+    {
+        "cable_uid": "string",
+        "test_data": "string"
+    }
+    ```
+*   **Response Body**:
+    ```json
+    {
+        "cable_uid": "string",
+        "test_id": "string",
+        "test_status": "string" // "pending", "in_progress", "completed", "error"
+    }
+    ```
+*   **Description**: Creates a new test ID, forks the assemble test process, and returns immediately.
 
-#### Request Body
-```json
-{
-    "cable_uid": "string",
-    "test_data": "string"
-}
-```
+### /api/v1/assemble_test/{test_id}
 
-#### Response Body
-```json
-{
-    "cable_uid": "string",
-    "test_id": "string",
-    "process_id": "string",
-    "test_status": "string"   // "pending", "in_progress", "completed", "error"
-}
-```
+#### **GET** /api/v1/assemble_test/{test_id}
+Get status of an assemble test.
+*   **Response Body**:
+    ```json
+    {
+        "cable_uid": "string",
+        "test_id": "string",
+        "test_status": "string"
+    }
+    ```
+*   **Description**: Checks the result file to determine the current status.
 
-#### Example
-**Request:**
-```http
-POST /api/v1/assemble_test HTTP/1.1
-Content-Type: application/json
+#### **DELETE** /api/v1/assemble_test/{test_id}
+Cancel a test.
+*   **Description**: Attempts to kill the process and marks the result as deleted.
 
-{
-    "cable_uid": "CABLE-2024-001",
-    "test_data": "config_v1"
-}
-```
+### /api/v1/assemble_test_clear_old_result
 
-**Response:**
-```json
-{
-    "cable_uid": "CABLE-2024-001",
-    "test_id": "550e8400-e29b-41d4-a716-446655440000",
-    "process_id": "12345",
-    "test_status": "pending"
-}
-```
+#### **POST** /api/v1/assemble_test_clear_old_result
+Clear old test results.
+*   **Request Body**:
+    ```json
+    {
+        "days": 1
+    }
+    ```
 
----
+### /api/v1/fim_state
 
-### 2. Get Assemble Test Status
-Retrieves the current status of a specific assembly test.
+#### **GET** /api/v1/fim_state
+Get all FIM states.
+*   **Response Body**:
+    ```json
+    {
+        "all_rack": [
+            {
+                "rack_sn": "string",
+                "test_round": [ ... ]
+            }
+        ]
+    }
+    ```
 
-- **Name**: Get Assemble Test Status
-- **Method**: `GET`
-- **URL**: `/api/v1/assemble_test/{test_id}`
-- **Description**: Checks the status of the test by reading the result file `.tmp.result_assemble_test_{test_id}.txt`.
+#### **GET** /api/v1/fim_state/{rack_sn}
+Get FIM state for a specific rack.
+*   **Response Body**:
+    ```json
+    {
+        "rack_sn": "string",
+        "test_round": [ ... ]
+    }
+    ```
 
-#### Request Parameters
-- `test_id`: The unique identifier of the test.
+#### **GET** /api/v1/fim_state/{rack_sn}/{test_round_id}
+Get FIM state for a specific round.
+*   **Response Body**: `FimStateRackItem` (similar to above but 1 round)
 
-#### Response Body
-```json
-{
-    "cable_uid": "string",
-    "test_id": "string",
-    "process_id": "string",
-    "test_status": "string"   // "pending", "in_progress", "completed", "failed"
-}
-```
+#### **POST** /api/v1/fim_state/{rack_sn}/{test_round_id}
+Update FIM state.
+*   **Request Body**:
+    ```json
+    {
+        "rack_sn": "string",
+        "test_round": [
+            {
+                 "test_round_id": 1,
+                 "fim_state": { ... }
+            }
+        ]
+    }
+    ```
+*   **Description**: Creates or updates the FIM state file `fim_state_{rack_sn}_{test_round_id}.json`.
 
-#### Example
-**Request:**
-```http
-GET /api/v1/assemble_test/550e8400-e29b-41d4-a716-446655440000 HTTP/1.1
-```
-
-**Response:**
-```json
-{
-    "cable_uid": "CABLE-2024-001",
-    "test_id": "550e8400-e29b-41d4-a716-446655440000",
-    "process_id": "12345",
-    "test_status": "completed"
-}
-```
-
----
-
-### 3. Delete/Cancel Assemble Test
-Cancels a running test or removes test records.
-
-- **Name**: Delete Assemble Test
-- **Method**: `DELETE`
-- **URL**: `/api/v1/assemble_test/{test_id}`
-- **Description**: Reads the process ID from `.tmp.{test_id}.pid`, terminates the process if running, deletes the PID file, and renames the result file to indicate deletion.
-
-#### Request Parameters
-- `test_id`: The unique identifier of the test.
-
-#### Example
-**Request:**
-```http
-DELETE /api/v1/assemble_test/550e8400-e29b-41d4-a716-446655440000 HTTP/1.1
-```
-
-**Response:**
-*Status Code: 200 OK* (or specific message)
-
----
-
-### 4. Clear Old Results
-Cleans up old result files and PID files from the system.
-
-- **Name**: Clear Old Results
-- **Method**: `POST`
-- **URL**: `/api/v1/assemble_test_clear_old_result`
-- **Description**: Deletes result files and PID files older than the specified number of days.
-
-#### Request Body
-```json
-{
-    "days": "int"
-}
-```
-*   `days`: (Optional) Number of days to retain files. Default is 1. If 0, deletes all.
-
-#### Example
-**Request:**
-```http
-POST /api/v1/assemble_test_clear_old_result HTTP/1.1
-Content-Type: application/json
-
-{
-    "days": 7
-}
-```
-
-**Response:**
-*Status Code: 200 OK*
+#### **DELETE** /api/v1/fim_state/{rack_sn}/{test_round_id}
+Delete FIM state.
+*   **Description**: Deletes the corresponding JSON file.

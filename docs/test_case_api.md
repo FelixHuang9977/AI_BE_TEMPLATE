@@ -1,22 +1,18 @@
-# Test Cases / 測試用例
+# Test Cases: API
 
-## TC-001: Create Test / 建立測試
-- **Step**: POST `/api/v1/assemble_test`
-- **Expected**: 200 OK, `test_id`, `status: pending`.
+## TC01: Create Assemble Test (Success)
+- **Input**: `POST /api/v1/assemble_test` with valid `cable_uid`, `test_data`.
+- **Expected**: HTTP 200, returns `test_id`, `test_status="pending"`.
 
-## TC-002: Check Status / 檢查狀態
-- **Step**: GET `/api/v1/assemble_test/{id}`
-- **Expected**: 200 OK, correct status.
+## TC02: Check Status (Assemble Test)
+- **Input**: `GET /api/v1/assemble_test/{test_id}`.
+- **Expected**: HTTP 200, returns current status.
 
-## TC-003: Non-blocking / 非阻塞
-- **Step**: Create test with long-running script.
-- **Expected**: Immediate response.
+## TC03: FIM State CRUD
+- **Create**: `POST /api/v1/fim_state/{rack}/{round}` -> HTTP 200.
+- **Read**: `GET /api/v1/fim_state/{rack}/{round}` -> HTTP 200 with data.
+- **Delete**: `DELETE /api/v1/fim_state/{rack}/{round}` -> HTTP 200.
 
-## TC-004: State Verification / 狀態驗證
-- **Step**: Mock script sets `in_progress`, then `completed`.
-- **Expected**: API reflects changes.
-
-## TC-005: Real Process Lifecycle / 真實流程生命週期
-- **Step**: Run `tests/test_real_assemble_test.py` (No mocks).
-- **Process**: API -> Script (Sleep 2s) -> In Progress -> Script (Sleep 5s) -> Completed.
-- **Expected**: Full state transition verified via API polling.
+## TC04: Real Integration
+- **Scenario**: Run full cycle with real script spawning.
+- **Env**: Configure `.env` with `production_url_base`.
